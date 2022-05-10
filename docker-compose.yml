@@ -5,7 +5,7 @@ services:
     # If the FQDN for your mail-server is only two labels (eg: example.com),
     # you can assign this entirely to `hostname` and remove `domainname`.
     hostname: mail
-    domainname: example.com
+    domainname: conveyor.email
     env_file: mailserver.env
     # More information about the mail-server ports:
     # https://docker-mailserver.github.io/docker-mailserver/edge/config/security/understanding-the-ports/
@@ -22,8 +22,25 @@ services:
       - ./docker-data/dms/mail-logs/:/var/log/mail/
       - ./docker-data/dms/config/:/tmp/docker-mailserver/
       - /etc/localtime:/etc/localtime:ro
-    restart: always
+      - /etc/letsencrypt:/etc/letsencrypt
+    restart: unless-stopped
     stop_grace_period: 1m
+    environment:
+      - TZ=America/Los_Angeles
+      - ENABLE_AMAVIS=0
+      - ENABLE_DNSBL=1
+      - ENABLE_CLAMAV=0
+      - ENABLE_POP3=1
+      - ENABLE_FAIL2BAN=0
+      - SSL_TYPE=letsencrypt
+      - TLS_LEVEL=modern
+      - SPOOF_PROTECTION=1
+      - POSTMASTER_ADDRESS=postmaster@conveyor.email
+      - ENABLE_UPDATE_CHECK=1
+      - POSTFIX_INET_PROTOCOLS=ipv4
+      - DOVECOT_INET_PROTOCOLS=ipv4
+      - ENABLE_FETCHMAIL=1
+      - ENABLE_POSTGREY=1
     cap_add:
       - NET_ADMIN
       - SYS_PTRACE
